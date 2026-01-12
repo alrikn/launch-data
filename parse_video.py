@@ -6,7 +6,7 @@ import re
 # If on Windows, set tesseract path like:
 # pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
-image_path = "telemetry.png"  # your image file
+image_path = "telemetry_2.png"  # your image file
 img = cv2.imread(image_path)
 
 # Convert to grayscale and improve contrast
@@ -25,19 +25,25 @@ print(text)
 # Velocity : 4.2 km/s
 
 # Parse values
-data = {}
+# Clean common OCR mistakes
+raw = text.replace("°F", "°E").replace("Allitude", "Altitude")
+
 patterns = {
-    "Time_s": r"Time\s*:\s*([\d.]+)",
-    "Latitude": r"Latitude\s*:\s*([0-9.°NSEW]+)",
-    "Longitude": r"Longitude\s*:\s*([0-9.°NSEW]+)",
-    "Altitude_km": r"Altitude\s*:\s*([\d.]+)",
-    "Velocity_km_s": r"Velocity\s*:\s*([\d.]+)"
+    "Time_s": r"(\d+\.\d+)\s*s",
+    "Latitude": r"(\d+\.\d+°[NS])",
+    "Longitude": r"(\d+\.\d+°[EW])",
+    "Altitude_km": r"(\d+\.\d+)\s*km",
+    "Velocity_km_s": r"(\d+\.\d+)\s*km/s"
 }
 
+data = {}
+
 for key, pattern in patterns.items():
-    match = re.search(pattern, text)
+    match = re.search(pattern, raw)
     if match:
         data[key] = match.group(1)
+
+print(f"data = {data}")
 
 # Save to CSV
 df = pd.DataFrame([data])
