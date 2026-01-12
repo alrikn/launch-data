@@ -2,9 +2,15 @@ import cv2
 import pytesseract
 import pandas as pd
 import re
+import glob
+import os
 
-# If on Windows, set tesseract path like:
-# pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+#on linux:
+#in the frames folder
+#the files are called frame_000001.png, etc...
+
+frames_dir = "frames"
+image_files = sorted(glob.glob(os.path.join(frames_dir, "frame_*.png")))
 
 image_path = "telemetry_2.png"  # your image file
 img = cv2.imread(image_path)
@@ -17,14 +23,7 @@ gray = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)[1]
 text = pytesseract.image_to_string(gray)
 print(text)
 
-# Example expected OCR output:
-# Time : 312.0 s
-# Latitude : 09.217°N
-# Longitude : 081.447°E
-# Altitude : 262.3 km
-# Velocity : 4.2 km/s
 
-# Parse values
 # Clean common OCR mistakes
 raw = text.replace("°F", "°E").replace("Allitude", "Altitude")
 
